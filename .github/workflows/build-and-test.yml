@@ -15,8 +15,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
     - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      id: build
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        run: |
+          pwd
+          ls -lah
+          whoami
+          env
+          freebsd-version
+          cargo build --release
+    - name: Test
+      id: test
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        run: |
+          pwd
+          ls -lah
+          whoami
+          env
+          freebsd-version
+          cargo test --verbose
