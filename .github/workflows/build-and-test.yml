@@ -33,19 +33,4 @@ jobs:
           env
           freebsd-version
           cargo build --release
-    - name: Test
-      id: test
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        
-        prepare: |
-          pkg install -y rust-nightly
-        
-        run: |
-          pwd
-          ls -lah
-          whoami
-          env
-          freebsd-version
           cargo test --verbose
