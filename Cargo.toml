@@ -1,0 +1,92 @@
+[package]
+name = "freebsd-rustdate"
+version = "0.6.1"
+license = "BSD-2-Clause"
+edition = "2021"
+
+[dependencies]
+clap = { version = "^4.5", features = ["derive", "wrap_help", "cargo"] }
+thiserror = "^1.0"
+anyhow = "^1.0"
+sysctl = "^0.5"
+base64 = "^0.22"
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
+serde_with = { version = "^3.7.0", features = ["hex"] }
+# This is pretty heavy, since it pulls in tokio just to let us look up
+# SRV records, but a quick survey doesn't show lighter crates that can do
+# that and seem remotely maintained, so...
+hickory-resolver = "^0.24"
+sha2 = "^0.10"
+# We're already pulling in the 'hex' crate via serde_with, so we could
+# use that instead of this.  But, this seems much more maintained, so
+# I'll stick with it for the moment.  It should be easy enough to rewrite
+# if needed...
+base16ct = "^0.2"
+tempfile = "^3"
+crossbeam = "^0.8"
+indicatif = "^0.17"
+flate2 = "^1"
+strum = { version = "^0.26.1", features = ["derive"] }
+chrono = "^0.4"
+qbsdiff = "^1.4.1"
+diffy = "^0.4.0"
+itertools = "^0.13"
+uzers = "^0.12"
+edit = "^0.1"
+hostname = "^0.4"
+# IgnorePaths are technically `grep -E` regexes.  In practice, I expect
+# the patterns to be trivial, so the differences between that and what
+# regex-lite implements are ignorable.  The extra capabilities regex
+# gives (like unicode support) are even more pointless here.  Maybe it's
+# faster at runtime, but worry about that when we find it's remotely
+# close to a bottleneck.
+regex-lite = "^0.1.5"
+# Already pulled in by other depends, so no point looking at lighter
+# alternatives anyway
+rand = "0.8"
+rand_pcg = "^0.3"
+# No f-u servers use https apparently, and there aren't any uncompressed
+# files big enough to benefit from gzip, so save some deps
+ureq = { version = "^2", default-features = false }
+url = "^2.5"
+# There may be a way to do this from the rsa crate, but the usage is
+# weird enough that I'm bailing...
+# Actually, at the moment, there isn't; presumably we need
+# https://github.com/RustCrypto/RSA/issues/231
+openssl = "^0.10"
+# This is really old, and pulls in an ancient version of syn, so it's
+# kinda heavy, but it's also apparently still the standard for doing its
+# job, so...
+derivative = "^2"
+# Not currently using
+#derive_builder = "^0.13"
+# Needed to get flags out of stat
+libc = "^0.2"
+
+
+# Dev and testing usually happen in dev profile, but the slowdown for the
+# SHA256 operations is very large in that case.  So, give it at least a
+# little optimization no matter what.  In a random test here, a run that
+# takes ca. 26 seconds with the default (0) takes 0.7 seconds with full
+# optimizations here.  For comparison, a full --release run takes about
+# 0.02 seconds less further, so this is really where all the optimization
+# wins are, and I doubt I'll ever need to debug sha2...
+[profile.dev.package.sha2]
+opt-level = 3
+
+# Same for compression
+[profile.dev.package.flate2]
+opt-level = 3
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+
+
+
+
+[[bin]]
+name = "freebsd-rustdate"
+test = false
+
+[lib]
+doctest = false

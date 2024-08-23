@@ -1,0 +1,6 @@
+This is freebsd-rustdate, a reimplemention of freebsd-update.  It's a
+tool for doing binary upgrades of FreeBSD systems.
+
+
+https://rustdate.over-yonder.net/
+<fullermd@over-yonder.net>

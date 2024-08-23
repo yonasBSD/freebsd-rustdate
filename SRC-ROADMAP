@@ -1,0 +1,76 @@
+A quick guide through the src tree.
+
+In cargo terms, this is both the `freebsd-rustdate` binary, and the
+`freebsd-rustdate` lib.  All the functionality is in the lib, the binary
+is just a tiny wrapper.  So, theoretically, this could be used as a crate
+by other code; in practice I've made no real attempt to allow that, so
+it'd probably need some reworking of visibility etc to be useful.
+
+The bin (src/main.rs) is appropriately tiny, it's effectively two lines
+of "parse command; run command;".  Everything really starts from the
+src/command.rs:run() function.  That dispatches to individual `run()`
+functions for each subcommand.  They're in individual files in the cmd/
+dir; src/cmd/fetch.rs, src/cmd/upgrade.rs, src/cmd/install.rs, etc.
+Walking through what each command does can be started from them.
+
+So, to understand the code, I'd start with some command (fetch, say), in
+src/cmd/fetch.rs.  Expect most of the initial lookup and file-fetching
+functionality to be through the Server struct, then most of the looking
+at actual files and changes to be done via various incarnations and
+friends of the Metadata structs.
+
+
+A few useful dirs in the tree:
+
+* cmd/
+
+  This is where the various user-level `freebsd-rustdate <cmd>` command
+  impls live.  Each would be in a file with a matching name (except with
+  -'s turned to _'s because $REASONS).
+
+* metadata/
+
+  This has the implementation of handling the various freebsd-update
+  metadata files.  These are the files downloaded from the server with
+  info about the files, types, hashes, etc.  Many useful methods hang off
+  the structs in here.  Often a single metadata files ends up as a
+  Metadata struct.  e.g. going through the `fetch` process will have one
+  for the INDEX-NEW fetched from the server, and one for the results of
+  scanning the local filesystem.  Then various methods on it and its
+  sub-parts can do the comparisons we need.
+
+* server/
+
+  This is all the stuff for talking to the freebsd-update server and
+  fetching down the files from it.  Via the Server struct.
+  Self-explanatory (or rather, not at all, but that's where that code
+  would be).
+
+* util/
+
+  This has various util funcs and structs used through the code.  The
+  implmeentation of compression and decompression, bspatching, SHA256
+  hashing (and associated datatypes), and some wrappers for filesystem
+  handling (e.g., we have to manually go down to libc to be able to get
+  the flags on files, since that's a very BSDism and isn't in the
+  standard lib).
+
+* core/
+
+  This contains a lot of higher-than-util, lower-than-command sort of
+  functions.  The bits used in actually installing files.  Filtering file
+  lists.  Merging changed files.  Scanning the filesystem.
+
+  * core/pool*
+
+    It also notably includes the abstraction built for threadpools doing
+    work, in pool.rs (implementation) and pool/*.rs (individual pools for
+    different uses).  They could probably use some refactoring.
+
+    Some of them might be better done as something async (like the HTTP
+    fetching).  All of them could possibly be better done by using some
+    existing threadpool crate.  Or building on rayon.  I wasn't able to
+    convince myself that I'd be able to write async code that would
+    actually help, and trying to be sure that rayon or a few other things
+    I looked at would let me control and understand what was going on
+    didn't seem fruitful.  So, I made my own septagonal wheel here.

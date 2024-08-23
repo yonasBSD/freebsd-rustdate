@@ -1,0 +1,62 @@
+= freebsd-rustdate changelog
+
+
+== 0.6.1  (2024-08-22)
+
+* Further code cleanups and reorganization.
+
+* Improve some output cosmetics.
+
+
+== 0.6.0  (2024-08-21)
+
+* Add `check-fetch` command to quickly check whether we seem to be on the
+  latest patchlevel.
+
+* Improve command and option help.
+
+* Various code and comment rearrangement and cleanup.
+
+
+== 0.5.0  (2024-08-20)
+
+* Add `cron` command to run with a variable sleep from cron, and email
+  the config'd MailTo when there's something to do.
+
+
+== 0.4.0  (2024-08-18)
+
+* Add `extract` command to extract exact upstream values of given paths.
+  This is intended to be used for manual spot cleanups of differences
+  identified by `check-sys` that you don't want to actually differ.  It
+  has few guardrails and is intended to do exactly what you say, so use
+  it with caution.
+
+* When ignoring hash difference, `check-sys` will no longer compute the
+  hashes of the files, which saves a lot of time.
+
+
+== 0.3.1  (2024-08-15)
+
+* The `check-sys` command has gained `--path` and `--exclude` arguments
+  to limit the paths checked, and the output format is cosmetically
+  adjusted.
+
+* KeepModifiedMetadata now properly ignores uid/gid when running as
+  non-root.  This is necessary because otherwise you'd miss out on a file
+  mode changing across versions.
+
+* Doing an upgrade from a non-latest-patchlevel is a bit more robust now.
+
+
+== 0.3.0  (2024-08-14)
+
+* Add `check-sys` command, which checks the state of your system against
+  the expected status from upstream.  Fills a similar role to
+  freebsd-update.sh's IDS command.
+
+
+== 0.2.0 (2024-08-13)
+
+First actual release.  Basic functionality available. fetch, upgrade,
+install all working in practice.
