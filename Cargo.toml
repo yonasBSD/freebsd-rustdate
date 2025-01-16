@@ -54,7 +54,7 @@ url = "^2.5"
 # weird enough that I'm bailing...
 # Actually, at the moment, there isn't; presumably we need
 # https://github.com/RustCrypto/RSA/issues/231
-openssl = "^0.10"
+openssl = { version = "^0.10", features = [ "vendored" ] }
 # This is really old, and pulls in an ancient version of syn, so it's
 # kinda heavy, but it's also apparently still the standard for doing its
 # job, so...
